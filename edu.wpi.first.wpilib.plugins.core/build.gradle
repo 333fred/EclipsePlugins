@@ -1,0 +1,136 @@
+repositories {
+    mavenCentral()
+    // SNAPSHOT versions are free to rely on other SNAPSHOT libraries
+    if (project.version.endsWith('SNAPSHOT')) {
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+        configurations.all {
+            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+    // local eclipse maven (created by Goomph)
+    maven {
+        url rootProject.file('target.p2/build/p2asmaven/maven')
+    }
+}
+
+// we need the maven repo from p2
+evaluationDependsOn(':target.p2')
+
+//////////
+// JAVA //
+//////////
+apply plugin: 'java'
+
+// add SWT and the appropriate platform-native SWT for building and testing
+dependencies {
+    compile "eclipse-deps:org.eclipse.swt:+"
+    compile "eclipse-deps:org.eclipse.swt.${com.diffplug.common.swt.os.SwtPlatform.getNative()}:+"
+}
+
+//////////
+// OSGI //
+//////////
+// create the manifest
+apply plugin: 'com.diffplug.gradle.osgi.bndmanifest'
+osgiBndManifest {
+    copyTo 'META-INF/MANIFEST.MF'
+}
+// configure the OSGi bundle
+jar.manifest.attributes(
+    'Manifest-Version': '1.0',
+    'Bundle-ManifestVersion' : '2',
+    'Bundle-Name' : 'edu.wpi.first.wpilib.plugins.core',
+    'Bundle-SymbolicName' : 'edu.wpi.first.wpilib.plugins.core;singleton:=true',
+    'Bundle-Version' : '0.1.0.qualifier',
+    'Bundle-Activator' : 'edu.wpi.first.wpilib.plugins.core.WPILibCore',
+    'Require-Bundle' : 'org.eclipse.ui,' +
+                       'org.eclipse.core.runtime,' +
+                       'org.eclipse.jface.text,' +
+                       'org.eclipse.core.resources,' +
+                       'org.eclipse.ui.editors,' +
+                       'org.eclipse.ui.ide,' +
+                       'org.eclipse.ant.core;bundle-version="3.2.400",' +
+                       'org.eclipse.ant.launching;bundle-version="1.0.200",' +
+                       'org.eclipse.debug.core;bundle-version="3.7.100",' +
+                       'org.eclipse.core.externaltools;bundle-version="1.0.100",' +
+                       'org.eclipse.debug.ui;bundle-version="3.8.1",' +
+                       'org.eclipse.ui.externaltools;bundle-version="3.2.100",' +
+                       'org.eclipse.ant.ui;bundle-version="3.5.300",' +
+                       'org.eclipse.ui.console;bundle-version="3.5.100",' +
+                       'org.eclipse.ui.navigator;bundle-version="3.5.200",' +
+                       'org.eclipse.ui.navigator.resources;bundle-version="3.4.400",' +
+                       'org.eclipse.ui.intro,' +
+                       'org.eclipse.ui.intro.universal,' +
+                       'org.eclipse.core.expressions;bundle-version="3.4.400",' +
+                       'org.eclipse.core.variables',
+    'Bundle-ActivationPolicy' : 'lazy;',
+    'Bundle-RequiredExecutionEnvironment' : 'JavaSE-1.7',
+    'Export-Package' : 'edu.wpi.first.wpilib.plugins.core,' +
+                       'edu.wpi.first.wpilib.plugins.core.ant,' +
+                       'edu.wpi.first.wpilib.plugins.core.installer,' +
+                       'edu.wpi.first.wpilib.plugins.core.launching,' +
+                       'edu.wpi.first.wpilib.plugins.core.nature,' +
+                       'edu.wpi.first.wpilib.plugins.core.preferences,' +
+                       'edu.wpi.first.wpilib.plugins.core.wizards'
+)
+
+//////////////////////
+// ECLIPSE PROJECTS //
+//////////////////////
+apply plugin: 'eclipse'
+// remove the build folder
+apply plugin: 'com.diffplug.gradle.eclipse.excludebuildfolder'
+// improve the project deps
+apply plugin: 'com.diffplug.gradle.eclipse.projectdeps'
+// handle build.properties correctly
+apply plugin: 'com.diffplug.gradle.eclipse.buildproperties'
+
+eclipse {
+    project {
+        natures 'org.eclipse.pde.PluginNature'
+        natures 'org.eclipse.jdt.core.javanature'
+
+        buildCommand 'org.eclipse.jdt.core.javabuilder'
+        buildCommand 'org.eclipse.pde.ManifestBuilder'
+        buildCommand 'org.eclipse.pde.SchemaBuilder'
+    }
+    classpath {
+        downloadSources true
+        downloadJavadoc true
+    }
+}
+// always create "fresh" projects
+tasks.eclipse.dependsOn(cleanEclipse)
+
+dependencies {
+    compile 'eclipse-deps:org.eclipse.platform:+'
+    compile 'eclipse-deps:org.eclipse.equinox.common:+'
+    compile 'eclipse-deps:org.eclipse.equinox.preferences:+'
+    compile 'eclipse-deps:org.eclipse.jface:+'
+    compile 'eclipse-deps:org.eclipse.jface.text:+'
+    compile 'eclipse-deps:org.eclipse.core.runtime:+'
+    compile 'eclipse-deps:org.eclipse.ui.editors:+'
+    compile 'eclipse-deps:org.eclipse.core.expressions:+'
+    compile 'eclipse-deps:org.eclipse.core.variables:+'
+    compile 'eclipse-deps:org.eclipse.core.externaltools:+'
+    compile 'eclipse-deps:org.eclipse.core.jobs:+'
+    compile 'eclipse-deps:org.eclipse.core.resources:+'
+    compile 'eclipse-deps:org.eclipse.core.runtime:+'
+    compile 'eclipse-deps:org.eclipse.ui.ide:+'
+    compile 'eclipse-deps:org.eclipse.ant.core:+'
+    compile 'eclipse-deps:org.eclipse.ant.launching:+'
+    compile 'eclipse-deps:org.eclipse.debug.core:+'
+    compile 'eclipse-deps:org.eclipse.debug.ui:+'
+    compile 'eclipse-deps:org.eclipse.ui.externaltools:+'
+    compile 'eclipse-deps:org.eclipse.ant.ui:+'
+    compile 'eclipse-deps:org.eclipse.ui:+'
+    compile 'eclipse-deps:org.eclipse.ui.console:+'
+    compile 'eclipse-deps:org.eclipse.ui.workbench:+'
+    compile 'eclipse-deps:org.eclipse.ui.navigator:+'
+    compile 'eclipse-deps:org.eclipse.ui.navigator.resources:+'
+    compile 'eclipse-deps:org.eclipse.ui.intro:+'
+    compile 'eclipse-deps:org.eclipse.ui.intro.universal:+'
+    compile 'eclipse-deps:org.eclipse.osgi:+'
+}

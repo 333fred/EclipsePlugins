@@ -1,0 +1,2 @@
+include 'edu.wpi.first.wpilib.plugins.core',
+        'target.p2'

@@ -1,0 +1,33 @@
+import com.diffplug.gradle.pde.EclipseRelease
+
+// Download from eclipse and put it into maven
+apply plugin: 'com.diffplug.gradle.p2.asmaven'
+p2AsMaven {
+    group 'eclipse-deps', {
+        repoEclipse '4.5.2'
+        feature 'org.eclipse.equinox.executable'
+        feature 'org.eclipse.rcp.configuration'
+        feature 'org.eclipse.platform'
+        feature 'org.eclipse.platform.source'
+        iu 'org.eclipse.ui'
+        iu 'org.eclipse.core.runtime'
+        iu 'org.eclipse.core.resources'
+        iu 'org.eclipse.core.externaltools'
+        iu 'org.eclipse.core.expressions'
+        iu 'org.eclipse.core.variables'
+        iu 'org.eclipse.jface.text'
+        iu 'org.eclipse.ui.ide'
+        iu 'org.eclipse.ui.editors'
+        iu 'org.eclipse.ui.navigator'
+        iu 'org.eclipse.ui.navigator.resources'
+        iu 'org.eclipse.ui.intro'
+        iu 'org.eclipse.ui.intro.universal'
+        iu 'org.eclipse.ui.externaltools'
+        iu 'org.eclipse.ui.console'
+        iu 'org.eclipse.ant.core'
+        iu 'org.eclipse.ant.ui'
+        iu 'org.eclipse.ant.launching'
+        iu 'org.eclipse.debug.ui'
+        repo2runnable()
+    }
+}
